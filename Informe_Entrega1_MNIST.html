@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Proyecto Final de Computación — Red Neuronal para Dígitos (MNIST)</title>
+<style>
+  @page {
+    size: A4;
+    margin: 18mm 18mm 18mm 18mm;
+  }
+  body {
+    font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
+    font-size: 10.5pt;
+    line-height: 1.52;
+    color: #1a1a1a;
+    margin: 0;
+    padding: 0;
+  }
+  .header-banner {
+    border-bottom: 3px solid #1e3a8a;
+    padding-bottom: 10px;
+    margin-bottom: 18px;
+  }
+  h1 {
+    font-size: 18pt;
+    color: #1e3a8a;
+    margin: 0 0 4px 0;
+    line-height: 1.25;
+  }
+  .subtitle {
+    font-size: 11pt;
+    color: #475569;
+    font-weight: 600;
+    margin: 0;
+  }
+  h2 {
+    font-size: 13.5pt;
+    color: #1e3a8a;
+    border-bottom: 1.5px solid #cbd5e1;
+    padding-bottom: 4px;
+    margin-top: 22px;
+    margin-bottom: 10px;
+    page-break-after: avoid;
+  }
+  h3 {
+    font-size: 11.2pt;
+    color: #0f172a;
+    margin-top: 14px;
+    margin-bottom: 6px;
+    page-break-after: avoid;
+  }
+  p {
+    margin: 0 0 9px 0;
+    text-align: justify;
+  }
+  ul, ol {
+    margin: 0 0 10px 0;
+    padding-left: 22px;
+  }
+  li {
+    margin-bottom: 5px;
+    text-align: justify;
+  }
+  code {
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 9.3pt;
+    background-color: #f1f5f9;
+    padding: 1px 4px;
+    border-radius: 3px;
+    color: #0f172a;
+  }
+  pre {
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 9pt;
+    background-color: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-radius: 5px;
+    padding: 9px 12px;
+    margin: 8px 0 12px 0;
+    line-height: 1.35;
+    page-break-inside: avoid;
+  }
+  .eq-box {
+    background-color: #f8fafc;
+    border-left: 3.5px solid #2563eb;
+    padding: 8px 14px;
+    margin: 9px 0 11px 0;
+    text-align: center;
+    font-size: 11pt;
+    page-break-inside: avoid;
+  }
+  math {
+    font-family: "Cambria Math", "Latin Modern Math", serif;
+    font-size: 11pt;
+  }
+  p math, li math, td math {
+    font-size: 10.5pt;
+  }
+  .figure-box {
+    text-align: center;
+    margin: 12px 0 14px 0;
+    page-break-inside: avoid;
+  }
+  .figure-box img {
+    max-width: 100%;
+    height: auto;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+  }
+  .caption {
+    font-size: 9pt;
+    color: #475569;
+    margin-top: 4px;
+    font-style: italic;
+    text-align: center;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 10px 0 14px 0;
+    font-size: 9.5pt;
+    page-break-inside: avoid;
+  }
+  th, td {
+    border: 1px solid #cbd5e1;
+    padding: 6px 8px;
+    text-align: left;
+    vertical-align: top;
+  }
+  th {
+    background-color: #eff6ff;
+    color: #1e3a8a;
+    font-weight: 700;
+  }
+  tr:nth-child(even) td {
+    background-color: #f8fafc;
+  }
+  .ref-item {
+    margin-bottom: 8px;
+    padding-left: 18px;
+    text-indent: -18px;
+    text-align: left;
+  }
+  .ref-note {
+    display: block;
+    text-indent: 0;
+    color: #334155;
+    font-size: 9.5pt;
+    margin-top: 2px;
+  }
+  a {
+    color: #1d4ed8;
+    text-decoration: none;
+  }
+</style>
+</head>
+<body>
+
+<div class="header-banner">
+  <h1>Proyecto Final de Computación: Red Neuronal para Dígitos (MNIST)</h1>
+  <p class="subtitle">Entrega 1 — Marco Teórico, Implementación Inicial y Verificación Científica</p>
+</div>
+
+<h2>1. El problema: qué es el fenómeno y por qué importa</h2>
+
+<p>Reconocer un número escrito a mano es una tarea instantánea para el cerebro humano, pero representa un problema clásico y complejo para la computación tradicional. Mientras que las personas identificamos fácilmente un dígito sin importar si está inclinado, escrito con trazo grueso o desplazado del centro, una computadora solo percibe una cuadrícula de píxeles con valores numéricos de intensidad luminosa. Intentar programar instrucciones fijas (reglas lógicas manuales del tipo <code>if/else</code>) para definir qué forma geométrica tiene un <code>"0"</code> o un <code>"1"</code> fracasa rápidamente debido a la enorme variabilidad de la caligrafía humana.</p>
+
+<p>Para resolver este fenómeno surgió el enfoque del <strong>aprendizaje automático (<em>Machine Learning</em>)</strong>: en lugar de programar las reglas de reconocimiento a mano, se formula un modelo matemático capaz de ajustar sus propios parámetros internos a partir de miles de ejemplos. En <strong>1998</strong>, <strong>Yann LeCun, Corinna Cortes y Christopher Burges</strong> publicaron la base de datos <strong>MNIST</strong> (<em>Modified National Institute of Standards and Technology</em>), una colección de <strong>70.000 imágenes</strong> de dígitos escritos a mano (de 28 × 28 píxeles en escala de grises) por empleados de la Oficina del Censo de Estados Unidos y estudiantes de secundaria.</p>
+
+<p>Este problema importa por dos razones fundamentales:</p>
+<ol>
+  <li><strong>En el plano práctico e histórico:</strong> dio origen a tecnologías cotidianas de visión por computadora y reconocimiento óptico de caracteres (OCR), como la clasificación automática de sobres por código postal en el correo y la lectura automática de importes en cheques bancarios.</li>
+  <li><strong>En el plano científico y conceptual:</strong> estudiar cómo una sola neurona artificial (una <strong>regresión logística</strong>) logra distinguir entre dos dígitos a partir de sus píxeles permite desarmar la "caja negra" de la inteligencia artificial, demostrando que el aprendizaje de una máquina se construye íntegramente sobre dos herramientas matemáticas fundamentales: <strong>álgebra lineal</strong> (productos punto) y <strong>cálculo diferencial</strong> (derivadas y regla de la cadena).</li>
+</ol>
+
+<div class="figure-box">
+  <img src="file:///C:/Users/coord/Desktop/Proyecto%20Final%20Computacion/paso2_ejemplos_mnist.png" alt="Ejemplos reales de MNIST">
+  <div class="caption">Figura 1: Primeros 8 ejemplos reales filtrados del dataset MNIST (28×28 píxeles normalizados entre 0 y 1).</div>
+</div>
+
+<h2>2. La idea de fondo: la matemática detrás de una neurona artificial</h2>
+
+<p>En nuestra versión inicial buscamos que el programa decida entre dos dígitos (<strong><code>"0"</code></strong> vs. <strong><code>"1"</code></strong>) utilizando una <strong>regresión logística</strong>, que matemáticamente equivale a <strong>una sola neurona artificial</strong>. El modelo opera mediante tres componentes clave: <strong>los pesos y el sesgo</strong>, <strong>la función sigmoide</strong> y <strong>el descenso por gradiente</strong>.</p>
+
+<h3>2.1. Los píxeles, los pesos (<i>w<sub>i</sub></i>) y el sesgo (<i>b</i>): una votación ponderada</h3>
+<p>Cada imagen de MNIST es una cuadrícula de 28 × 28 píxeles que se "desenrolla" en un vector fila de 784 números (<math><mover><mi>x</mi><mo>→</mo></mover><mo>=</mo><mo>[</mo><msub><mi>x</mi><mn>1</mn></msub><mo>,</mo><msub><mi>x</mi><mn>2</mn></msub><mo>,</mo><mo>…</mo><mo>,</mo><msub><mi>x</mi><mn>784</mn></msub><mo>]</mo></math>), normalizados de modo que <code>0.0</code> representa un píxel totalmente negro (fondo vacío) y <code>1.0</code> un píxel totalmente blanco (trazo).</p>
+
+<p>Para decidir qué dígito es, la neurona asigna un <strong>peso</strong> (<math><msub><mi>w</mi><mi>i</mi></msub></math>) a cada uno de los 784 píxeles. Cada peso indica cómo influye ese píxel en la decisión:</p>
+<ul>
+  <li><strong>Peso positivo (<math><msub><mi>w</mi><mi>i</mi></msub><mo>&gt;</mo><mn>0</mn></math>):</strong> si ese píxel está encendido, suma votos a favor de que la imagen sea un <strong><code>"1"</code></strong> (clase <math><mi>y</mi><mo>=</mo><mn>1</mn></math>).</li>
+  <li><strong>Peso negativo (<math><msub><mi>w</mi><mi>i</mi></msub><mo>&lt;</mo><mn>0</mn></math>):</strong> si ese píxel está encendido, resta votos, empujando la decisión hacia el <strong><code>"0"</code></strong> (clase <math><mi>y</mi><mo>=</mo><mn>0</mn></math>).</li>
+  <li><strong>Peso cercano a cero (<math><msub><mi>w</mi><mi>i</mi></msub><mo>≈</mo><mn>0</mn></math>):</strong> el píxel es irrelevante para distinguir ambos dígitos (por ejemplo, los márgenes exteriores que siempre están negros).</li>
+</ul>
+
+<p>La neurona multiplica cada píxel por su peso, suma todo y añade un umbral base llamado <strong>sesgo</strong> (<math><mi>b</mi></math>, o <em>bias</em>):</p>
+
+<div class="eq-box">
+  <math display="block">
+    <mi>z</mi><mo>=</mo>
+    <mo>(</mo><msub><mi>w</mi><mn>1</mn></msub><msub><mi>x</mi><mn>1</mn></msub><mo>+</mo><msub><mi>w</mi><mn>2</mn></msub><msub><mi>x</mi><mn>2</mn></msub><mo>+</mo><mo>⋯</mo><mo>+</mo><msub><mi>w</mi><mn>784</mn></msub><msub><mi>x</mi><mn>784</mn></msub><mo>)</mo>
+    <mo>+</mo><mi>b</mi>
+    <mo>=</mo><mover><mi>w</mi><mo>→</mo></mover><mo>⋅</mo><mover><mi>x</mi><mo>→</mo></mover><mo>+</mo><mi>b</mi>
+  </math>
+</div>
+
+<h3>2.2. Ejemplo chico: una mini-imagen de 3 × 3 píxeles</h3>
+<p>Imaginemos que, en lugar de 784 píxeles, tenemos una pantalla diminuta de 3 × 3 (9 píxeles) y queremos distinguir un <strong><code>"1"</code></strong> (un trazo vertical en la columna central) de un <strong><code>"0"</code></strong> (un anillo con el centro vacío):</p>
+
+<pre>   Imagen de un "1"         Imagen de un "0"         Plantilla de Pesos (w)
+   [ 0 , 1 , 0 ]            [ 1 , 1 , 1 ]            [ -1 , +2 , -1 ]
+   [ 0 , 1 , 0 ]            [ 1 , 0 , 1 ]            [ -1 , +2 , -1 ]
+   [ 0 , 1 , 0 ]            [ 1 , 1 , 1 ]            [ -1 , +2 , -1 ]</pre>
+
+<p>Si la neurona cuenta con la plantilla de pesos <math><mi>w</mi></math> de la derecha (que premia con <math><mo>+</mo><mn>2</mn></math> la columna central y castiga con <math><mo>−</mo><mn>1</mn></math> las columnas laterales) y un sesgo <math><mi>b</mi><mo>=</mo><mn>0</mn></math>:</p>
+<ul>
+  <li><strong>Al mostrarle la imagen del <code>"1"</code>:</strong> solo están encendidos los 3 píxeles centrales. Al multiplicar píxel a píxel y sumar: <math><mi>z</mi><mo>=</mo><mo>(</mo><mn>1</mn><mo>⋅</mo><mn>2</mn><mo>)</mo><mo>+</mo><mo>(</mo><mn>1</mn><mo>⋅</mo><mn>2</mn><mo>)</mo><mo>+</mo><mo>(</mo><mn>1</mn><mo>⋅</mo><mn>2</mn><mo>)</mo><mo>=</mo><mn mathvariant="bold">+6</mn></math>.</li>
+  <li><strong>Al mostrarle la imagen del <code>"0"</code>:</strong> están encendidos los 6 píxeles laterales (donde <math><msub><mi>w</mi><mi>i</mi></msub><mo>=</mo><mo>−</mo><mn>1</mn></math>) y los 2 extremos superior e inferior del centro (donde <math><msub><mi>w</mi><mi>i</mi></msub><mo>=</mo><mo>+</mo><mn>2</mn></math>), mientras que el centro está apagado: <math><mi>z</mi><mo>=</mo><mn>6</mn><mo>⋅</mo><mo>(</mo><mo>−</mo><mn>1</mn><mo>)</mo><mo>+</mo><mn>2</mn><mo>⋅</mo><mo>(</mo><mo>+</mo><mn>2</mn><mo>)</mo><mo>=</mo><mo>−</mo><mn>6</mn><mo>+</mo><mn>4</mn><mo>=</mo><mn mathvariant="bold">−2</mn></math>.</li>
+</ul>
+
+<h3>2.3. La función que aplasta entre 0 y 1: la Sigmoide (<i>σ</i>)</h3>
+<p>La suma ponderada <math><mi>z</mi></math> puede arrojar cualquier número real. Como necesitamos una <strong>probabilidad</strong> <math><mover><mi>y</mi><mo>^</mo></mover></math> entre 0 y 1, pasamos <math><mi>z</mi></math> por la <strong>función sigmoide</strong>:</p>
+
+<div class="eq-box">
+  <math display="block">
+    <mover><mi>y</mi><mo>^</mo></mover><mo>=</mo><mi>σ</mi><mo>(</mo><mi>z</mi><mo>)</mo><mo>=</mo>
+    <mfrac>
+      <mn>1</mn>
+      <mrow><mn>1</mn><mo>+</mo><msup><mi>e</mi><mrow><mo>−</mo><mi>z</mi></mrow></msup></mrow>
+    </mfrac>
+  </math>
+</div>
+
+<ul>
+  <li>Para la imagen del <strong><code>"1"</code></strong> (<math><mi>z</mi><mo>=</mo><mo>+</mo><mn>6</mn></math>): <math><mover><mi>y</mi><mo>^</mo></mover><mo>=</mo><mi>σ</mi><mo>(</mo><mn>6</mn><mo>)</mo><mo>=</mo><mfrac><mn>1</mn><mrow><mn>1</mn><mo>+</mo><msup><mi>e</mi><mrow><mo>−</mo><mn>6</mn></mrow></msup></mrow></mfrac><mo>≈</mo><mn mathvariant="bold">0.9975</mn></math> (99.75% de probabilidad de ser un <code>"1"</code>).</li>
+  <li>Para la imagen del <strong><code>"0"</code></strong> (<math><mi>z</mi><mo>=</mo><mo>−</mo><mn>2</mn></math>): <math><mover><mi>y</mi><mo>^</mo></mover><mo>=</mo><mi>σ</mi><mo>(</mo><mo>−</mo><mn>2</mn><mo>)</mo><mo>=</mo><mfrac><mn>1</mn><mrow><mn>1</mn><mo>+</mo><msup><mi>e</mi><mn>2</mn></msup></mrow></mfrac><mo>≈</mo><mn mathvariant="bold">0.1192</mn></math> (11.92% de ser un <code>"1"</code>, por lo que decide que es un <strong><code>"0"</code></strong>).</li>
+</ul>
+
+<h3>2.4. Definición de la Función de Error (Entropía Cruzada Binaria)</h3>
+<p>En la práctica, los pesos empiezan en 0 y la neurona los aprende sola midiendo qué tan mal se equivoca mediante la función de pérdida de <strong>Entropía Cruzada Binaria (<em>Log-Loss</em>)</strong>:</p>
+<ul>
+  <li>Si la imagen real es un <code>"1"</code> (<math><mi>y</mi><mo>=</mo><mn>1</mn></math>), el costo es <math><mo>−</mo><mi>ln</mi><mo>(</mo><mover><mi>y</mi><mo>^</mo></mover><mo>)</mo></math>. Si predice <math><mover><mi>y</mi><mo>^</mo></mover><mo>=</mo><mn>1</mn></math>, el error es <math><mo>−</mo><mi>ln</mi><mo>(</mo><mn>1</mn><mo>)</mo><mo>=</mo><mn>0</mn></math>; si predice <math><mover><mi>y</mi><mo>^</mo></mover><mo>=</mo><mn>0.01</mn></math>, el error se dispara a <math><mo>−</mo><mi>ln</mi><mo>(</mo><mn>0.01</mn><mo>)</mo><mo>≈</mo><mn>4.60</mn></math>.</li>
+  <li>Si la imagen real es un <code>"0"</code> (<math><mi>y</mi><mo>=</mo><mn>0</mn></math>), el costo es <math><mo>−</mo><mi>ln</mi><mo>(</mo><mn>1</mn><mo>−</mo><mover><mi>y</mi><mo>^</mo></mover><mo>)</mo></math>.</li>
+</ul>
+<p>Unificando ambos casos en una única ecuación:</p>
+
+<div class="eq-box">
+  <math display="block">
+    <mi>L</mi><mo>(</mo><mi>y</mi><mo>,</mo><mover><mi>y</mi><mo>^</mo></mover><mo>)</mo><mo>=</mo>
+    <mo>−</mo><mrow><mo>[</mo><mi>y</mi><mo>⋅</mo><mi>ln</mi><mo>(</mo><mover><mi>y</mi><mo>^</mo></mover><mo>)</mo><mo>+</mo><mo>(</mo><mn>1</mn><mo>−</mo><mi>y</mi><mo>)</mo><mo>⋅</mo><mi>ln</mi><mo>(</mo><mn>1</mn><mo>−</mo><mover><mi>y</mi><mo>^</mo></mover><mo>)</mo><mo>]</mo></mrow>
+  </math>
+</div>
+
+<h3>2.5. Obtención del Gradiente paso a paso mediante la Regla de la Cadena</h3>
+<p>Para saber cómo modificar cada peso <math><msub><mi>w</mi><mi>i</mi></msub></math> para achicar el error <math><mi>L</mi></math>, calculamos la derivada parcial <math><mfrac><mrow><mo>∂</mo><mi>L</mi></mrow><mrow><mo>∂</mo><msub><mi>w</mi><mi>i</mi></msub></mrow></mfrac></math>. Como <math><msub><mi>w</mi><mi>i</mi></msub><mo>→</mo><mi>z</mi><mo>→</mo><mover><mi>y</mi><mo>^</mo></mover><mo>→</mo><mi>L</mi></math>, por la <strong>Regla de la Cadena</strong> multiplicamos las tres derivadas intermedias:</p>
+
+<div class="eq-box">
+  <math display="block">
+    <mfrac><mrow><mo>∂</mo><mi>L</mi></mrow><mrow><mo>∂</mo><msub><mi>w</mi><mi>i</mi></msub></mrow></mfrac>
+    <mo>=</mo>
+    <mfrac><mrow><mo>∂</mo><mi>L</mi></mrow><mrow><mo>∂</mo><mover><mi>y</mi><mo>^</mo></mover></mrow></mfrac>
+    <mo>⋅</mo>
+    <mfrac><mrow><mo>∂</mo><mover><mi>y</mi><mo>^</mo></mover></mrow><mrow><mo>∂</mo><mi>z</mi></mrow></mfrac>
+    <mo>⋅</mo>
+    <mfrac><mrow><mo>∂</mo><mi>z</mi></mrow><mrow><mo>∂</mo><msub><mi>w</mi><mi>i</mi></msub></mrow></mfrac>
+  </math>
+</div>
+
+<ol>
+  <li><strong>Eslabón 1 (<math><mfrac><mrow><mo>∂</mo><mi>L</mi></mrow><mrow><mo>∂</mo><mover><mi>y</mi><mo>^</mo></mover></mrow></mfrac></math>):</strong> Derivando los logaritmos respecto de <math><mover><mi>y</mi><mo>^</mo></mover></math> y sacando denominador común:
+    <div class="eq-box">
+      <math display="block">
+        <mfrac><mrow><mo>∂</mo><mi>L</mi></mrow><mrow><mo>∂</mo><mover><mi>y</mi><mo>^</mo></mover></mrow></mfrac>
+        <mo>=</mo><mo>−</mo><mrow><mo>(</mo><mfrac><mi>y</mi><mover><mi>y</mi><mo>^</mo></mover></mfrac><mo>−</mo><mfrac><mrow><mn>1</mn><mo>−</mo><mi>y</mi></mrow><mrow><mn>1</mn><mo>−</mo><mover><mi>y</mi><mo>^</mo></mover></mrow></mfrac><mo>)</mo></mrow>
+        <mo>=</mo><mfrac><mrow><mover><mi>y</mi><mo>^</mo></mover><mo>−</mo><mi>y</mi></mrow><mrow><mover><mi>y</mi><mo>^</mo></mover><mo>(</mo><mn>1</mn><mo>−</mo><mover><mi>y</mi><mo>^</mo></mover><mo>)</mo></mrow></mfrac>
+      </math>
+    </div>
+  </li>
+  <li><strong>Eslabón 2 (<math><mfrac><mrow><mo>∂</mo><mover><mi>y</mi><mo>^</mo></mover></mrow><mrow><mo>∂</mo><mi>z</mi></mrow></mfrac></math>):</strong> Derivando la función sigmoide <math><mover><mi>y</mi><mo>^</mo></mover><mo>=</mo><msup><mrow><mo>(</mo><mn>1</mn><mo>+</mo><msup><mi>e</mi><mrow><mo>−</mo><mi>z</mi></mrow></msup><mo>)</mo></mrow><mrow><mo>−</mo><mn>1</mn></mrow></msup></math> respecto de <math><mi>z</mi></math>:
+    <div class="eq-box">
+      <math display="block">
+        <mfrac><mrow><mo>∂</mo><mover><mi>y</mi><mo>^</mo></mover></mrow><mrow><mo>∂</mo><mi>z</mi></mrow></mfrac>
+        <mo>=</mo><mfrac><msup><mi>e</mi><mrow><mo>−</mo><mi>z</mi></mrow></msup><msup><mrow><mo>(</mo><mn>1</mn><mo>+</mo><msup><mi>e</mi><mrow><mo>−</mo><mi>z</mi></mrow></msup><mo>)</mo></mrow><mn>2</mn></msup></mfrac>
+        <mo>=</mo><mover><mi>y</mi><mo>^</mo></mover><mo>⋅</mo><mo>(</mo><mn>1</mn><mo>−</mo><mover><mi>y</mi><mo>^</mo></mover><mo>)</mo>
+      </math>
+    </div>
+  </li>
+  <li><strong>Eslabón 3 (<math><mfrac><mrow><mo>∂</mo><mi>z</mi></mrow><mrow><mo>∂</mo><msub><mi>w</mi><mi>i</mi></msub></mrow></mfrac></math>):</strong> Derivando la suma lineal <math><mi>z</mi><mo>=</mo><mo>∑</mo><msub><mi>w</mi><mi>i</mi></msub><msub><mi>x</mi><mi>i</mi></msub><mo>+</mo><mi>b</mi></math> respecto de <math><msub><mi>w</mi><mi>i</mi></msub></math>, sobrevive únicamente su coeficiente <math><msub><mi>x</mi><mi>i</mi></msub></math>. (Y para el sesgo <math><mi>b</mi></math>, como está multiplicado por 1, su tercer eslabón es <math><mfrac><mrow><mo>∂</mo><mi>z</mi></mrow><mrow><mo>∂</mo><mi>b</mi></mrow></mfrac><mo>=</mo><mn>1</mn></math>).</li>
+</ol>
+
+<p>Al multiplicar los tres eslabones, el factor <math><mover><mi>y</mi><mo>^</mo></mover><mo>(</mo><mn>1</mn><mo>−</mo><mover><mi>y</mi><mo>^</mo></mover><mo>)</mo></math> se cancela exactamente y obtenemos las fórmulas de gradiente y actualización del <strong>Descenso por Gradiente</strong>:</p>
+
+<div class="eq-box">
+  <math display="block">
+    <mfrac><mrow><mo>∂</mo><mi>L</mi></mrow><mrow><mo>∂</mo><msub><mi>w</mi><mi>i</mi></msub></mrow></mfrac><mo>=</mo><mo>(</mo><mover><mi>y</mi><mo>^</mo></mover><mo>−</mo><mi>y</mi><mo>)</mo><mo>⋅</mo><msub><mi>x</mi><mi>i</mi></msub>
+    <mspace width="2em"></mspace>
+    <mo>⟹</mo>
+    <mspace width="2em"></mspace>
+    <msubsup><mi>w</mi><mi>i</mi><mtext>nuevo</mtext></msubsup><mo>=</mo><msubsup><mi>w</mi><mi>i</mi><mtext>viejo</mtext></msubsup><mo>−</mo><mi>α</mi><mo>⋅</mo><mo>(</mo><mover><mi>y</mi><mo>^</mo></mover><mo>−</mo><mi>y</mi><mo>)</mo><mo>⋅</mo><msub><mi>x</mi><mi>i</mi></msub>
+  </math>
+  <math display="block" style="margin-top:6px;">
+    <mfrac><mrow><mo>∂</mo><mi>L</mi></mrow><mrow><mo>∂</mo><mi>b</mi></mrow></mfrac><mo>=</mo><mover><mi>y</mi><mo>^</mo></mover><mo>−</mo><mi>y</mi>
+    <mspace width="3.1em"></mspace>
+    <mo>⟹</mo>
+    <mspace width="2em"></mspace>
+    <msup><mi>b</mi><mtext>nuevo</mtext></msup><mo>=</mo><msup><mi>b</mi><mtext>viejo</mtext></msup><mo>−</mo><mi>α</mi><mo>⋅</mo><mo>(</mo><mover><mi>y</mi><mo>^</mo></mover><mo>−</mo><mi>y</mi><mo>)</mo>
+  </math>
+</div>
+
+<h3>2.6. Los cuatro escenarios prácticos del ajuste de un peso (con <i>α</i> = 0.1 y <i>w<sub>i</sub></i><sup>viejo</sup> = 0.50)</h3>
+<ul>
+  <li><strong>Caso 1 — Píxel apagado (<math><msub><mi>x</mi><mi>i</mi></msub><mo>=</mo><mn>0</mn></math>):</strong> <math><mtext>Gradiente</mtext><mo>=</mo><mo>(</mo><mover><mi>y</mi><mo>^</mo></mover><mo>−</mo><mi>y</mi><mo>)</mo><mo>⋅</mo><mn>0</mn><mo>=</mo><mn>0</mn><mo>⇒</mo><msubsup><mi>w</mi><mi>i</mi><mtext>nuevo</mtext></msubsup><mo>=</mo><mn mathvariant="bold">0.50</mn></math>. No aportó a la suma, por lo que no tuvo culpa del error y no se modifica.</li>
+  <li><strong>Caso 2 — Predicción perfecta (<math><mover><mi>y</mi><mo>^</mo></mover><mo>=</mo><mi>y</mi></math>):</strong> <math><mtext>Gradiente</mtext><mo>=</mo><mn>0</mn><mo>⇒</mo><msubsup><mi>w</mi><mi>i</mi><mtext>nuevo</mtext></msubsup><mo>=</mo><mn mathvariant="bold">0.50</mn></math>. El sistema está en equilibrio.</li>
+  <li><strong>Caso 3 — Era un <code>"1"</code> (<math><mi>y</mi><mo>=</mo><mn>1</mn></math>), pero predijo bajo (<math><mover><mi>y</mi><mo>^</mo></mover><mo>=</mo><mn>0.20</mn></math>, <math><msub><mi>x</mi><mi>i</mi></msub><mo>=</mo><mn>1</mn></math>):</strong> <math><msubsup><mi>w</mi><mi>i</mi><mtext>nuevo</mtext></msubsup><mo>=</mo><mn>0.50</mn><mo>−</mo><mn>0.1</mn><mo>⋅</mo><mo>(</mo><mo>−</mo><mn>0.80</mn><mo>)</mo><mo>=</mo><mn mathvariant="bold">0.58</mn></math>. Como se quedó corta, la regla le <strong>suma</strong> valor al peso.</li>
+  <li><strong>Caso 4 — Era un <code>"0"</code> (<math><mi>y</mi><mo>=</mo><mn>0</mn></math>), pero predijo alto (<math><mover><mi>y</mi><mo>^</mo></mover><mo>=</mo><mn>0.90</mn></math>, <math><msub><mi>x</mi><mi>i</mi></msub><mo>=</mo><mn>1</mn></math>):</strong> <math><msubsup><mi>w</mi><mi>i</mi><mtext>nuevo</mtext></msubsup><mo>=</mo><mn>0.50</mn><mo>−</mo><mn>0.1</mn><mo>⋅</mo><mo>(</mo><mo>+</mo><mn>0.90</mn><mo>)</mo><mo>=</mo><mn mathvariant="bold">0.41</mn></math>. Como se pasó de largo, la regla le <strong>resta</strong> valor al peso.</li>
+</ul>
+
+<h2>3. Las bibliotecas: cuáles usamos y qué hacen sus partes clave</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th style="width:26%;">Biblioteca y Módulo</th>
+      <th style="width:28%;">Componente / Función Clave</th>
+      <th style="width:46%;">Qué hace exactamente en nuestro programa</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong><code>scikit-learn</code></strong> (<code>sklearn.datasets</code>)</td>
+      <td><code>fetch_openml('mnist_784')</code></td>
+      <td>Descarga las 70.000 imágenes de MNIST en una matriz <code>X</code> de (70000, 784) y un vector de etiquetas <code>y</code>.</td>
+    </tr>
+    <tr>
+      <td><strong><code>scikit-learn</code></strong> (<code>sklearn.model_selection</code>)</td>
+      <td><code>train_test_split(..., stratify=y)</code></td>
+      <td>Separa el 80% de las imágenes para entrenar (<code>X_train</code>, 11.824 fotos) y reserva el 20% para probar (<code>X_test</code>, 2.956 fotos) manteniendo la proporción exacta de <code>'0'</code>s y <code>'1'</code>s.</td>
+    </tr>
+    <tr>
+      <td><strong><code>scikit-learn</code></strong> (<code>sklearn.linear_model</code>)</td>
+      <td><code>SGDClassifier(loss='log_loss')</code></td>
+      <td>Implementa la neurona con función de pérdida de Entropía Cruzada (<code>log_loss</code>, sigmoide) entrenada mediante Descenso por Gradiente.</td>
+    </tr>
+    <tr>
+      <td><strong><code>scikit-learn</code></strong> (Atributos internos)</td>
+      <td><code>.coef_</code>, <code>.intercept_</code>, <code>.predict_proba()</code></td>
+      <td><code>.coef_</code> almacena los 784 pesos aprendidos (<math><mover><mi>w</mi><mo>→</mo></mover></math>); <code>.intercept_</code> almacena el sesgo (<math><mi>b</mi></math>); <code>.predict_proba()</code> evalúa <math><mi>σ</mi><mo>(</mo><mover><mi>w</mi><mo>→</mo></mover><mo>⋅</mo><mover><mi>x</mi><mo>→</mo></mover><mo>+</mo><mi>b</mi><mo>)</mo></math>.</td>
+    </tr>
+    <tr>
+      <td><strong><code>NumPy</code></strong> (<code>numpy</code>)</td>
+      <td><code>np.dot()</code>, <code>np.exp()</code>, <code>X / 255.0</code>, <code>.reshape(28, 28)</code></td>
+      <td>Filtra los dígitos <code>'0'</code> y <code>'1'</code>, normaliza los píxeles al rango [0, 1], calcula productos punto y reconstruye vectores de 784 en cuadrículas de 28 × 28.</td>
+    </tr>
+    <tr>
+      <td><strong><code>Matplotlib</code></strong> (<code>matplotlib.pyplot</code>)</td>
+      <td><code>plt.imshow(..., cmap='RdBu_r')</code></td>
+      <td>Visualiza los dígitos en escala de grises y grafica el mapa de calor de los 784 pesos para verificar físicamente qué aprendió la neurona.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>4. La verificación: pruebas de control y resultados obtenidos</h2>
+
+<p>Para comprobar científicamente que nuestro programa (<code>mnist_binario.py</code>) hace lo que tiene que hacer, ejecutamos cuatro pruebas sobre el conjunto de prueba (<strong>2.956 imágenes que la neurona nunca vio durante el entrenamiento</strong>):</p>
+
+<ol>
+  <li><strong>Verificación de cuenta interna y caso sintético de resultado conocido:</strong> En la primera imagen de prueba (<code>X_test[0]</code>, etiqueta real <math><mi>y</mi><mo>=</mo><mn>1</mn></math>), la suma ponderada dio <math><mi>z</mi><mo>=</mo><mn>9.0770</mn></math> y nuestra cuenta manual <math><mi>σ</mi><mo>(</mo><mn>9.0770</mn><mo>)</mo></math> arrojó <strong><code>0.99988575</code></strong>, idéntico hasta el octavo decimal al valor devuelto por <code>predict_proba()</code>. Asimismo, al ingresar una <strong>imagen sintética totalmente negra</strong> (<math><mover><mi>x</mi><mo>→</mo></mover><mo>=</mo><mover><mn>0</mn><mo>→</mo></mover></math>), la probabilidad devuelta por el programa fue exactamente <math><mi>σ</mi><mo>(</mo><mi>b</mi><mo>)</mo><mo>=</mo><mfrac><mn>1</mn><mrow><mn>1</mn><mo>+</mo><msup><mi>e</mi><mrow><mo>−</mo><mn>0.5317</mn></mrow></msup></mrow></mfrac><mo>=</mo><mn mathvariant="bold">0.62987174</mn></math>.</li>
+  <li><strong>Propiedad matemática (Descenso monótono del error):</strong> Al entrenar nuestra propia neurona en NumPy desde pesos en cero (<math><mover><mi>w</mi><mo>→</mo></mover><mo>=</mo><mover><mn>0</mn><mo>→</mo></mover><mo>,</mo><mi>b</mi><mo>=</mo><mn>0</mn></math>), verificamos que en la Época 0 el error inicial es exactamente <math><mo>−</mo><mi>ln</mi><mo>(</mo><mn>0.5</mn><mo>)</mo><mo>=</mo><mn mathvariant="bold">0.6931</mn></math> (53.30% de acierto). Con el descenso por gradiente, el error baja monótonamente época tras época (<code>0.6931 → 0.1248 → 0.0392 → 0.0174 → 0.0086</code>), como muestra la Figura 2A.</li>
+  <li><strong>Inspección física de resultado conocido (El Mapa de Pesos de 28 × 28):</strong> Al graficar los 784 pesos aprendidos (Figura 2B y 2C), comprobamos que los pesos del <strong>centro vertical son fuertemente positivos (rojo)</strong> donde se dibuja el bastón del <code>"1"</code>, rodeados por un <strong>anillo de pesos negativos (azul)</strong> por donde pasa el contorno del <code>"0"</code>, mientras que los bordes vacíos quedan en <code>0.0</code> (blanco).</li>
+  <li><strong>Comparación con valores publicados (&gt;99% esperado para <code>'0'</code> vs. <code>'1'</code>):</strong> En las 2.956 imágenes de prueba obtuvimos una exactitud de <strong><code>99.86%</code></strong> con <code>scikit-learn</code> (y <strong><code>99.73%</code></strong> con nuestra neurona pura en NumPy), acertando 2.952 imágenes y fallando únicamente en <strong>4 casos ambiguos</strong> (1.380/1.381 ceros correctos y 1.572/1.575 unos correctos).</li>
+</ol>
+
+<div class="figure-box">
+  <img src="file:///C:/Users/coord/Desktop/Proyecto%20Final%20Computacion/paso6_verificacion_modelo.png" alt="Verificación Matemática y Física">
+  <div class="caption">Figura 2: (A) Descenso monótono del error de Entropía Cruzada. (B y C) Mapas de calor de los 784 pesos aprendidos en 28×28 píxeles.</div>
+</div>
+
+<div class="figure-box">
+  <img src="file:///C:/Users/coord/Desktop/Proyecto%20Final%20Computacion/paso6_errores_test.png" alt="Inspección de Errores en Test" style="max-width:78%;">
+  <div class="caption">Figura 3: Los únicos 4 casos mal clasificados de las 2.956 imágenes de prueba (un '0' relleno sin hueco central y tres '1's con trazos laterales).</div>
+</div>
+
+<h2>5. Las fuentes: bibliografía citada</h2>
+
+<div class="ref-item">
+  1. <strong>LeCun, Y., Bottou, L., Bengio, Y., &amp; Haffner, P. (1998).</strong> <em>Gradient-based learning applied to document recognition</em>. Proceedings of the IEEE, 86(11), 2278–2324. <a href="https://doi.org/10.1109/5.726791">https://doi.org/10.1109/5.726791</a>
+  <span class="ref-note">→ Respalda el origen histórico del problema (lectura óptica de cheques y códigos postales) y los valores publicados de referencia (Tabla I) para clasificadores lineales de una capa sobre MNIST.</span>
+</div>
+
+<div class="ref-item">
+  2. <strong>LeCun, Y., Cortes, C., &amp; Burges, C. J. (1998).</strong> <em>The MNIST Database of Handwritten Digits</em>. Courant Institute of Mathematical Sciences, New York University. <a href="https://yann.lecun.com/exdb/mnist/">https://yann.lecun.com/exdb/mnist/</a>
+  <span class="ref-note">→ Documenta la construcción de las 70.000 imágenes de dígitos escritos a mano por empleados del censo y estudiantes, normalizadas en grillas de 28 × 28 píxeles en escala de grises (0 a 255).</span>
+</div>
+
+<div class="ref-item">
+  3. <strong>Nielsen, M. A. (2015).</strong> <em>Neural Networks and Deep Learning</em>. Determination Press. Capítulos 1 y 3. <a href="http://neuralnetworksanddeeplearning.com/">http://neuralnetworksanddeeplearning.com/</a>
+  <span class="ref-note">→ Respalda el modelo de neurona sigmoide (Cap. 1) y la deducción paso a paso de la función de costo de entropía cruzada con la regla de la cadena, donde se cancela el término σ'(z) = ŷ(1 − ŷ) para dar ∂L/∂w<sub>i</sub> = (ŷ − y)x<sub>i</sub> y ∂L/∂b = (ŷ − y) (Cap. 3).</span>
+</div>
+
+<div class="ref-item">
+  4. <strong>Bishop, C. M. (2006).</strong> <em>Pattern Recognition and Machine Learning</em>. Springer. Capítulo 4, Sección 4.3.2 (<em>Logistic Regression</em>, págs. 205–207).
+  <span class="ref-note">→ Proporciona la formulación matemática rigurosa de la regresión logística binaria, la derivada de la función logística sigmoide y la optimización por gradiente de la entropía cruzada.</span>
+</div>
+
+<div class="ref-item">
+  5. <strong>Géron, A. (2022).</strong> <em>Hands-On Machine Learning with Scikit-Learn, Keras, and TensorFlow</em> (3.ª ed.). O'Reilly Media. Capítulos 3 y 4.
+  <span class="ref-note">→ Fundamenta la descarga de <code>'mnist_784'</code> con <code>fetch_openml</code>, la partición estratificada de entrenamiento/prueba y el entrenamiento de clasificadores binarios con <code>SGDClassifier</code>.</span>
+</div>
+
+<div class="ref-item">
+  6. <strong>Pedregosa, F., Varoquaux, G., Gramfort, A., et al. (2011).</strong> <em>Scikit-learn: Machine Learning in Python</em>. Journal of Machine Learning Research, 12, 2825–2830. Documentación oficial: <a href="https://scikit-learn.org/stable/modules/sgd.html">https://scikit-learn.org/stable/modules/sgd.html</a>
+  <span class="ref-note">→ Especifica el funcionamiento interno de <code>SGDClassifier(loss='log_loss')</code> y los atributos <code>.coef_</code>, <code>.intercept_</code> y <code>.predict_proba()</code>.</span>
+</div>
+
+<div class="ref-item">
+  7. <strong>Harris, C. R., Millman, K. J., van der Walt, S. J., et al. (2020).</strong> <em>Array programming with NumPy</em>. Nature, 585(7825), 357–362. <a href="https://doi.org/10.1038/s41586-020-2649-2">https://doi.org/10.1038/s41586-020-2649-2</a>
+  <span class="ref-note">→ Respalda la vectorización matricial, el producto punto (<code>np.dot</code>), la normalización de píxeles y el redimensionamiento <code>.reshape(28, 28)</code>.</span>
+</div>
+
+<div class="ref-item">
+  8. <strong>Hunter, J. D. (2007).</strong> <em>Matplotlib: A 2D graphics environment</em>. Computing in Science &amp; Engineering, 9(3), 90–95. <a href="https://doi.org/10.1109/MCSE.2007.55">https://doi.org/10.1109/MCSE.2007.55</a>
+  <span class="ref-note">→ Fundamenta la visualización de matrices bidimensionales y mapas de calor divergentes (<code>imshow</code> con <code>cmap='RdBu_r'</code>) para inspeccionar la plantilla de pesos.</span>
+</div>
+
+</body>
+</html>

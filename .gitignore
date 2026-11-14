@@ -1,0 +1,5 @@
+# Ignorar caché temporal y datos descargados pesados (se descargan solos al correr el script)
+.mpl_cache/
+datos_mnist/
+__pycache__/
+*.pyc
